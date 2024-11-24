@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charging Status Calculation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+        }
+        .status {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .good {
+            color: green;
+        }
+        .bad {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Charging Status & Performance</h1>
+    <p id="battery-level" class="status">Battery level: Checking...</p>
+    <p id="charge-speed" class="status">Charge Speed: Calculating...</p>
+    <p id="charge-status-indicator" class="status">Charge Status: </p>
+
+    <script>
+        let prevLevel = 0;
+        let prevTime = Date.now();
+
+        function calculateChargingTime() {
+            navigator.getBattery().then(function(battery) {
+                let batteryLevel = (battery.level * 100).toFixed(2);
+                let chargingStatus = battery.charging ? "Charging" : "Not Charging";
+                let timeElapsed = (Date.now() - prevTime) / 1000; // time in seconds
+                let levelDiff = battery.level * 100 - prevLevel;
+                let chargeSpeed = (levelDiff / timeElapsed).toFixed(2); // in % per second
+                let timePerPercent = (1 / chargeSpeed).toFixed(2); // in seconds
+
+                // Convert time per percent to minutes
+                let timePerPercentMinutes = (timePerPercent / 60).toFixed(2);
+
+                // Calculate performance and status
+                let chargeStatusText = "";
+                if (chargeSpeed >= 0.01) { // If charging speed is 1% or more per minute
+                    chargeStatusText = "Good";
+                    document.getElementById('charge-status-indicator').className = "status good";
+                } else {
+                    chargeStatusText = "Bad";
+                    document.getElementById('charge-status-indicator').className = "status bad";
+                }
+
+                // Update the results
+                document.getElementById('battery-level').textContent = "Battery level: " + batteryLevel + "%";
+                document.getElementById('charge-speed').textContent = "Charge Speed: " + chargeSpeed + " %/sec";
+                document.getElementById('charge-status-indicator').textContent = "Charge Status: " + chargeStatusText;
+
+                // Update the previous level and time for the next calculation
+                prevLevel = battery.level * 100;
+                prevTime = Date.now();
+            });
+        }
+
+        // Call the function to display the information every 30 seconds
+        setInterval(calculateChargingTime, 30000); // updates every 30 seconds
+    </script>
+
+</body>
+</html>
