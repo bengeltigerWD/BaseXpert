@@ -3,21 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charging Status Calculation</title>
+    <title>Charging Time Calculation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
             background-color: #f4f4f9;
             color: #333;
+            text-align: center;
+            background-image: url('https://media.giphy.com/media/3oEjI5DXj6QmQpPGeQ/giphy.gif'); /* Updated charging animation */
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            height: 100vh;
         }
         h1 {
-            color: #4CAF50;
-            text-align: center;
+            color: #fff;
+            margin-top: 20px;
         }
         .status {
             font-size: 18px;
             margin: 10px 0;
+            color: #fff;
         }
         .result {
             font-size: 20px;
@@ -27,61 +33,88 @@
         .good {
             color: green;
         }
+        .medium {
+            color: orange;
+        }
         .bad {
             color: red;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            width: 200px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
 
-    <h1>Charging Status & Performance</h1>
-    <p id="battery-level" class="status">Battery level: Checking...</p>
-    <p id="charge-speed" class="status">Charge Speed: Calculating...</p>
-    <p id="charge-status-indicator" class="status">Charge Status: </p>
+    <h1>Charging Time এবং স্ট্যাটাস</h1>
+
+    <form id="charging-form">
+        <label for="battery-level" style="color:white;">বর্তমান ব্যাটারি লেভেল (%): </label>
+        <input type="number" id="battery-level" min="0" max="100" required><br><br>
+        <label for="charging-time" style="color:white;">চার্জিং সময় (মিনিট): </label>
+        <input type="number" id="charging-time" required><br><br>
+        <button type="button" onclick="calculateChargeStatus()">স্ট্যাটাস হিসাব করুন</button>
+    </form>
+
+    <p id="charge-status" class="status">চার্জ স্ট্যাটাস: </p>
+    <p id="charge-speed" class="status">চার্জ স্পিড: </p>
+    <p id="time-to-full" class="status">পূর্ণ চার্জ হতে সময়: </p>
 
     <script>
-        let prevLevel = 0;
-        let prevTime = Date.now();
+        function calculateChargeStatus() {
+            const batteryLevel = document.getElementById('battery-level').value;
+            const chargingTime = document.getElementById('charging-time').value;
 
-        function calculateChargingTime() {
-            if (navigator.getBattery) { // Checking if the browser supports getBattery
-                navigator.getBattery().then(function(battery) {
-                    let batteryLevel = (battery.level * 100).toFixed(2);
-                    let chargingStatus = battery.charging ? "Charging" : "Not Charging";
-                    let timeElapsed = (Date.now() - prevTime) / 1000; // time in seconds
-                    let levelDiff = battery.level * 100 - prevLevel;
-                    let chargeSpeed = (levelDiff / timeElapsed).toFixed(2); // in % per second
-                    let timePerPercent = (1 / chargeSpeed).toFixed(2); // in seconds
-
-                    // Convert time per percent to minutes
-                    let timePerPercentMinutes = (timePerPercent / 60).toFixed(2);
-
-                    // Calculate performance and status
-                    let chargeStatusText = "";
-                    if (chargeSpeed >= 0.01) { // If charging speed is 1% or more per minute
-                        chargeStatusText = "Good";
-                        document.getElementById('charge-status-indicator').className = "status good";
-                    } else {
-                        chargeStatusText = "Bad";
-                        document.getElementById('charge-status-indicator').className = "status bad";
-                    }
-
-                    // Update the results
-                    document.getElementById('battery-level').textContent = "Battery level: " + batteryLevel + "%";
-                    document.getElementById('charge-speed').textContent = "Charge Speed: " + chargeSpeed + " %/sec";
-                    document.getElementById('charge-status-indicator').textContent = "Charge Status: " + chargeStatusText;
-
-                    // Update the previous level and time for the next calculation
-                    prevLevel = battery.level * 100;
-                    prevTime = Date.now();
-                });
-            } else {
-                alert("Battery API is not supported on this device or browser.");
+            if (batteryLevel < 0 || batteryLevel > 100 || chargingTime <= 0) {
+                alert("অনুগ্রহ করে সঠিক মান প্রবেশ করুন");
+                return;
             }
-        }
 
-        // Call the function to display the information every 30 seconds
-        setInterval(calculateChargingTime, 30000); // updates every 30 seconds
+            // চার্জ স্পিড (প্রতিমিনিটে শতাংশ) হিসাব করুন
+            let chargeSpeed = batteryLevel / chargingTime;
+
+            // স্ট্যাটাস নির্ধারণ করুন
+            let chargeStatusText = "";
+            let statusClass = "";
+
+            if (chargeSpeed >= 1 && chargeSpeed <= 1.5) { // ভাল (Good)
+                chargeStatusText = "ভাল";
+                statusClass = "good";
+            } else if (chargeSpeed > 1.5 && chargeSpeed <= 2.5) { // মাঝামাঝি (Medium)
+                chargeStatusText = "মাঝামাঝি";
+                statusClass = "medium";
+            } else if (chargeSpeed > 2.5 && chargeSpeed <= 3.5) { // খারাপ (Bad)
+                chargeStatusText = "খারাপ";
+                statusClass = "bad";
+            } else {
+                chargeStatusText = "খারাপ";
+                statusClass = "bad";
+            }
+
+            // পূর্ণ চার্জ হতে কত সময় লাগবে হিসাব করুন
+            let timeToFullCharge = (100 - batteryLevel) / chargeSpeed; // সময় (মিনিটে)
+            let timeToFullChargeText = `পূর্ণ চার্জ হতে সময়: ${timeToFullCharge.toFixed(2)} মিনিট`;
+
+            // UI আপডেট করুন
+            document.getElementById('charge-status').textContent = "চার্জ স্ট্যাটাস: " + chargeStatusText;
+            document.getElementById('charge-speed').textContent = "চার্জ স্পিড: " + chargeSpeed.toFixed(2) + " %/মিনিট";
+            document.getElementById('time-to-full').textContent = timeToFullChargeText;
+            document.getElementById('charge-status').className = statusClass;
+        }
     </script>
 
 </body>
