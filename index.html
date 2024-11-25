@@ -3,119 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charging Time Calculation</title>
+    <title>Binary Toolset</title>
     <style>
+        /* General Styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            text-align: center;
-            background-image: url('https://media.giphy.com/media/3oEjI5DXj6QmQpPGeQ/giphy.gif'); /* Updated charging animation */
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-            height: 100vh;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
+
         h1 {
+            background-color: #007BFF;
             color: #fff;
-            margin-top: 20px;
-        }
-        .status {
-            font-size: 18px;
-            margin: 10px 0;
-            color: #fff;
-        }
-        .result {
-            font-size: 20px;
+            width: 100%;
+            text-align: center;
+            margin: 0;
+            padding: 15px 0;
+            font-size: 35px;
             font-weight: bold;
-            margin-top: 15px;
+            border-radius: 5px;
         }
-        .good {
-            color: green;
+
+        .container {
+            display: none; /* Initially hidden */
+            max-width: 500px;
+            width: 100%;
+            margin: 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
         }
-        .medium {
-            color: orange;
+
+        .container.active {
+            display: block;
         }
-        .bad {
-            color: red;
-        }
-        input {
-            padding: 8px;
-            margin: 5px;
-            width: 200px;
-        }
-        button {
-            padding: 10px 20px;
+
+        input, select, button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
             font-size: 16px;
-            background-color: #4CAF50;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        button {
+            background-color: #007BFF;
             color: white;
             border: none;
             cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .nav-buttons {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .nav-buttons button {
+            width: 150px;
+            margin: 10px;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 8px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-buttons button:hover {
+            background-color: #0056b3;
+        }
+
+        p {
+            font-size: 18px;
             margin-top: 15px;
         }
-        button:hover {
-            background-color: #45a049;
+
+        .result {
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+
+        footer a {
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
+    <h1>BaseXpert</h1>
 
-    <h1>Charging Time এবং স্ট্যাটাস</h1>
+    <div class="nav-buttons">
+ <a href="index.html" class="btn">Home</a>
+        <a href="about.html" class="btn">About Us</a>
+<button onclick="showSection('conversion')">সংখ্যা পদ্ধতি রূপান্তর</button>
+        <button onclick="showSection('twosComplement')">2's Complement</button>
+        <button onclick="showSection('binaryMath')">বাইনারি যোগ-বিয়োগ</button>
+    </div>
 
-    <form id="charging-form">
-        <label for="battery-level" style="color:white;">বর্তমান ব্যাটারি লেভেল (%): </label>
-        <input type="number" id="battery-level" min="0" max="100" required><br><br>
-        <label for="charging-time" style="color:white;">চার্জিং সময় (মিনিট): </label>
-        <input type="number" id="charging-time" required><br><br>
-        <button type="button" onclick="calculateChargeStatus()">স্ট্যাটাস হিসাব করুন</button>
-    </form>
+    <!-- Number System Converter Section -->
+    <div id="conversion" class="container">
+        <h2>সংখ্যা পদ্ধতি রূপান্তর</h2>
+        <input type="text" id="numberInput" placeholder="সংখ্যা লিখুন (ইংলিশে লিখুন)">
+        <select id="fromBase">
+            <option value="2">বাইনারি</option>
+            <option value="8">অক্টাল</option>
+            <option value="10" selected>দশমিক</option>
+            <option value="16">হেক্সাডেসিমাল</option>
+        </select>
+        <select id="toBase">
+            <option value="2">বাইনারি</option>
+            <option value="8">অক্টাল</option>
+            <option value="10">দশমিক</option>
+            <option value="16">হেক্সাডেসিমাল</option>
+        </select>
+        <button onclick="convert()">রূপান্তর করুন</button>
+        <p>ফলাফল: <span class="result" id="conversionResult">-</span></p>
+        <p id="conversionError" class="error"></p>
+    </div>
 
-    <p id="charge-status" class="status">চার্জ স্ট্যাটাস: </p>
-    <p id="charge-speed" class="status">চার্জ স্পিড: </p>
-    <p id="time-to-full" class="status">পূর্ণ চার্জ হতে সময়: </p>
+    <!-- 2's Complement Section -->
+    <div id="twosComplement" class="container">
+        <h2>2's Complement রূপান্তর</h2>
+        <input type="text" id="binaryInput" placeholder="বাইনারি সংখ্যা লিখুন (ইংলিশে লিখুন)">
+        <button onclick="calculateTwosComplement()">রূপান্তর করুন</button>
+        <p>2's Complement: <span class="result" id="twosResult">-</span></p>
+        <p id="twosError" class="error"></p>
+    </div>
 
+    <!-- Binary Math Section -->
+    <div id="binaryMath" class="container">
+        <h2>বাইনারি যোগ-বিয়োগ</h2>
+        <input type="text" id="binary1" placeholder="প্রথম বাইনারি সংখ্যা লিখুন (ইংলিশে লিখুন)">
+        <input type="text" id="binary2" placeholder="দ্বিতীয় বাইনারি সংখ্যা লিখুন (ইংলিশে লিখুন)">
+        <select id="binaryOperation">
+            <option value="add">যোগ</option>
+            <option value="subtract">বিয়োগ</option>
+        </select>
+        <button onclick="calculateBinaryMath()">গণনা করুন</button>
+        <p>ফলাফল: <span class="result" id="binaryMathResult">-</span></p>
+        <p id="binaryMathError" class="error"></p>
+    </div>
+
+    <footer>
+        <p>© 2024 - BaseXpert রূপান্তর টুল | ডেভেলপার - <a href="http://wa.me/8801938954599">আজমীর আহমেদ </a> | <a href="https://bengeltigerwd.github.io/Bengal-Tiger-Website-Development-LTD/">Bengal Tiger Web Development L.T.D</a></p>
+    </footer>
+<footer>
+<p>Last Update On 25/11/2024 (vr-1.0)</P>
+  </footer>
     <script>
-        function calculateChargeStatus() {
-            const batteryLevel = document.getElementById('battery-level').value;
-            const chargingTime = document.getElementById('charging-time').value;
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.container').forEach(container => {
+                container.classList.remove('active');
+            });
+            // Show the selected section
+            document.getElementById(sectionId).classList.add('active');
+        }
 
-            if (batteryLevel < 0 || batteryLevel > 100 || chargingTime <= 0) {
-                alert("অনুগ্রহ করে সঠিক মান প্রবেশ করুন");
+        // Number System Conversion Function
+        function convert() {
+            const number = document.getElementById('numberInput').value;
+            const fromBase = parseInt(document.getElementById('fromBase').value);
+            const toBase = parseInt(document.getElementById('toBase').value);
+            const errorElement = document.getElementById('conversionError');
+
+            // Validate input number for the base
+            if (!isValidNumber(number, fromBase)) {
+                errorElement.textContent = `ভুল সংখ্যা, ${fromBase} পদ্ধতির জন্য সঠিক ইনপুট দিন।`;
                 return;
             }
+            errorElement.textContent = ''; // Clear any previous error
 
-            // চার্জ স্পিড (প্রতিমিনিটে শতাংশ) হিসাব করুন
-            let chargeSpeed = batteryLevel / chargingTime;
+            try {
+                const decimalNumber = parseInt(number, fromBase);
+                const result = decimalNumber.toString(toBase).toUpperCase();
+                document.getElementById('conversionResult').innerText = result;
+            } catch (error) {
+                document.getElementById('conversionResult').innerText = "ভুল ইনপুট!";
+            }
+        }
 
-            // স্ট্যাটাস নির্ধারণ করুন
-            let chargeStatusText = "";
-            let statusClass = "";
+        function isValidNumber(number, base) {
+            const validChars = base === 2 ? /^[01]+$/ : base === 8 ? /^[0-7]+$/ : base === 10 ? /^[0-9]+$/ : /^[0-9A-Fa-f]+$/;
+            return validChars.test(number);
+        }
 
-            if (chargeSpeed >= 1 && chargeSpeed <= 1.5) { // ভাল (Good)
-                chargeStatusText = "ভাল";
-                statusClass = "good";
-            } else if (chargeSpeed > 1.5 && chargeSpeed <= 2.5) { // মাঝামাঝি (Medium)
-                chargeStatusText = "মাঝামাঝি";
-                statusClass = "medium";
-            } else if (chargeSpeed > 2.5 && chargeSpeed <= 3.5) { // খারাপ (Bad)
-                chargeStatusText = "খারাপ";
-                statusClass = "bad";
-            } else {
-                chargeStatusText = "খারাপ";
-                statusClass = "bad";
+        // 2's Complement Calculation Function
+        function calculateTwosComplement() {
+            const binary = document.getElementById('binaryInput').value;
+            const errorElement = document.getElementById('twosError');
+
+            // Validate binary input
+            if (!/^[01]+$/.test(binary)) {
+                errorElement.textContent = "শুধুমাত্র বাইনারি সংখ্যা দিন!";
+                return;
+            }
+            errorElement.textContent = ''; // Clear any previous error
+
+            const n = binary.length;
+            const onesComplement = binary.split('').map(bit => bit === '0' ? '1' : '0').join('');
+            const twosComplement = (parseInt(onesComplement, 2) + 1).toString(2).padStart(n, '0');
+
+            document.getElementById('twosResult').innerText = twosComplement;
+        }
+
+        // Binary Math Calculation Function
+        function calculateBinaryMath() {
+            const binary1 = document.getElementById('binary1').value;
+            const binary2 = document.getElementById('binary2').value;
+            const operation = document.getElementById('binaryOperation').value;
+            const errorElement = document.getElementById('binaryMathError');
+
+            // Validate binary inputs
+            if (!/^[01]+$/.test(binary1) || !/^[01]+$/.test(binary2)) {
+                errorElement.textContent = "শুধুমাত্র বাইনারি সংখ্যা দিন!";
+                return;
+            }
+            errorElement.textContent = ''; // Clear any previous error
+
+            const decimal1 = parseInt(binary1, 2);
+            const decimal2 = parseInt(binary2, 2);
+            let result;
+            if (operation === 'add') {
+                result = (decimal1 + decimal2).toString(2);
+            } else if (operation === 'subtract') {
+                result = (decimal1 - decimal2).toString(2);
             }
 
-            // পূর্ণ চার্জ হতে কত সময় লাগবে হিসাব করুন
-            let timeToFullCharge = (100 - batteryLevel) / chargeSpeed; // সময় (মিনিটে)
-            let timeToFullChargeText = `পূর্ণ চার্জ হতে সময়: ${timeToFullCharge.toFixed(2)} মিনিট`;
-
-            // UI আপডেট করুন
-            document.getElementById('charge-status').textContent = "চার্জ স্ট্যাটাস: " + chargeStatusText;
-            document.getElementById('charge-speed').textContent = "চার্জ স্পিড: " + chargeSpeed.toFixed(2) + " %/মিনিট";
-            document.getElementById('time-to-full').textContent = timeToFullChargeText;
-            document.getElementById('charge-status').className = statusClass;
+            document.getElementById('binaryMathResult').innerText = result;
         }
-    </script>
 
+    </script>
 </body>
 </html>
