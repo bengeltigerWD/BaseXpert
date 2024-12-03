@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Base  pert</title>
+    <title>Base Xpert</title>
     <style>
         /* General Styles */
         body {
@@ -131,7 +131,9 @@
          <a href="contact.html" class="btn">Contact Us</a>
 <button onclick="showSection('conversion')">সংখ্যা পদ্ধতি রূপান্তর</button>
         <button onclick="showSection('twosComplement')">2's Complement</button>
-        <button onclick="showSection('binaryMath')">বাইনারি যোগ-বিয়োগ</button>
+        <button onclick="showSection('binaryMath')"> যোগ-বিয়োগ</button>
+<button onclick="showSection('logicGates')">লজিক গেট সিমুলেটর</button>
+
     </div>
 
     <!-- Number System Converter Section -->
@@ -164,25 +166,45 @@
         <p id="twosError" class="error"></p>
     </div>
 
-    <!-- Binary Math Section -->
-    <div id="binaryMath" class="container">
-        <h2>বাইনারি যোগ-বিয়োগ</h2>
-        <input type="text" id="binary1" placeholder="প্রথম বাইনারি সংখ্যা লিখুন (ইংলিশে লিখুন)">
-        <input type="text" id="binary2" placeholder="দ্বিতীয় বাইনারি সংখ্যা লিখুন (ইংলিশে লিখুন)">
-        <select id="binaryOperation">
-            <option value="add">যোগ</option>
-            <option value="subtract">বিয়োগ</option>
-        </select>
-        <button onclick="calculateBinaryMath()">গণনা করুন</button>
-        <p>ফলাফল: <span class="result" id="binaryMathResult">-</span></p>
-        <p id="binaryMathError" class="error"></p>
-    </div>
+<!-- Binary Math Section -->
+<div id="binaryMath" class="container">
+    <h2>বাইনারি, ডেসিমাল, অক্টাল, হেক্সাডেসিমাল যোগ-বিয়োগ</h2>
+    <input type="text" id="binary1" placeholder="প্রথম সংখ্যা লিখুন (ইংলিশে লিখুন)">
+    <input type="text" id="binary2" placeholder="দ্বিতীয় সংখ্যা লিখুন (ইংলিশে লিখুন)">
+    <select id="mathBase">
+        <option value="2">বাইনারি</option>
+        <option value="8">অক্টাল</option>
+        <option value="10" selected>ডেসিমাল</option>
+        <option value="16">হেক্সাডেসিমাল</option>
+    </select>
+    <select id="binaryOperation">
+        <option value="add">যোগ</option>
+        <option value="subtract">বিয়োগ</option>
+    </select>
+    <button onclick="calculateBinaryMath()">গণনা করুন</button>
+    <p>ফলাফল: <span class="result" id="binaryMathResult">-</span></p>
+    <p id="binaryMathError" class="error"></p>
+</div>
+<!-- Logic Gate Simulator Section -->
+<div id="logicGates" class="container">
+    <h2>লজিক গেট সিমুলেটর</h2>
+    <select id="gateType">
+        <option value="AND">AND গেট</option>
+        <option value="OR">OR গেট</option>
+        <option value="NOT">NOT গেট</option>
+    </select>
+    <input type="text" id="input1" placeholder="ইনপুট 1 (0 বা 1)">
+    <input type="text" id="input2" placeholder="ইনপুট 2 (0 বা 1)">
+    <button onclick="simulateGate()">গেট সিমুলেট করুন</button>
+    <p>ফলাফল: <span class="result" id="gateResult">-</span></p>
+    <p id="gateError" class="error"></p>
+</div>
 
     <footer>
         <p>© 2024 - BaseXpert রূপান্তর টুল | ডেভেলপার - <a href="http://wa.me/8801938954599">আজমীর আহমেদ </a> | <a href="https://bengeltigerwd.github.io/Bengal-Tiger-Website-Development-LTD/">Bengal Tiger Web Development L.T.D</a></p>
     </footer>
 <footer>
-<p>Last Update On 25/11/2024 (vr-1.0)</P>
+<p>Last Update On 03/12/2024 (vr-1.2)</P>
   </footer>
     <script>
         function showSection(sectionId) {
@@ -242,30 +264,66 @@
         }
 
         // Binary Math Calculation Function
-        function calculateBinaryMath() {
-            const binary1 = document.getElementById('binary1').value;
-            const binary2 = document.getElementById('binary2').value;
-            const operation = document.getElementById('binaryOperation').value;
-            const errorElement = document.getElementById('binaryMathError');
+         function calculateBinaryMath() {
+        const num1 = document.getElementById('binary1').value;
+        const num2 = document.getElementById('binary2').value;
+        const base = parseInt(document.getElementById('mathBase').value);
+        const operation = document.getElementById('binaryOperation').value;
+        const errorElement = document.getElementById('binaryMathError');
 
-            // Validate binary inputs
-            if (!/^[01]+$/.test(binary1) || !/^[01]+$/.test(binary2)) {
-                errorElement.textContent = "শুধুমাত্র বাইনারি সংখ্যা দিন!";
-                return;
-            }
-            errorElement.textContent = ''; // Clear any previous error
+        // Validate inputs for the selected base
+        const isValidNumber = (num, base) => {
+            const validChars = base === 2 ? /^[01]+$/ : base === 8 ? /^[0-7]+$/ : base === 10 ? /^[0-9]+$/ : /^[0-9A-Fa-f]+$/;
+            return validChars.test(num);
+        };
 
-            const decimal1 = parseInt(binary1, 2);
-            const decimal2 = parseInt(binary2, 2);
-            let result;
-            if (operation === 'add') {
-                result = (decimal1 + decimal2).toString(2);
-            } else if (operation === 'subtract') {
-                result = (decimal1 - decimal2).toString(2);
-            }
-
-            document.getElementById('binaryMathResult').innerText = result;
+        if (!isValidNumber(num1, base) || !isValidNumber(num2, base)) {
+            errorElement.textContent = `${base} বেসের সঠিক সংখ্যা দিন।`;
+            return;
         }
+
+        errorElement.textContent = ''; // Clear any previous error
+
+        const decimal1 = parseInt(num1, base);
+        const decimal2 = parseInt(num2, base);
+
+        let result;
+        if (operation === 'add') {
+            result = (decimal1 + decimal2).toString(base).toUpperCase();
+        } else if (operation === 'subtract') {
+            result = (decimal1 - decimal2).toString(base).toUpperCase();
+        }
+
+        document.getElementById('binaryMathResult').innerText = result || "ভুল ইনপুট!";
+    }
+function simulateGate() {
+    const gateType = document.getElementById('gateType').value;
+    const input1 = document.getElementById('input1').value;
+    const input2 = document.getElementById('input2').value;
+    const errorElement = document.getElementById('gateError');
+    const resultElement = document.getElementById('gateResult');
+
+    // Validate inputs (0 or 1 only)
+    if (!/^[01]$/.test(input1) || (gateType !== "NOT" && !/^[01]$/.test(input2))) {
+        errorElement.textContent = "শুধুমাত্র 0 বা 1 প্রদান করুন।";
+        return;
+    }
+    errorElement.textContent = ""; // Clear previous errors
+
+    let result;
+    const bit1 = parseInt(input1, 10);
+    const bit2 = parseInt(input2, 10);
+
+    if (gateType === "AND") {
+        result = bit1 & bit2;
+    } else if (gateType === "OR") {
+        result = bit1 | bit2;
+    } else if (gateType === "NOT") {
+        result = bit1 === 0 ? 1 : 0; // NOT gate only uses input1
+    }
+
+    resultElement.textContent = result;
+}
 
     </script>
     <!-- Default Statcounter code for Base Xpert
